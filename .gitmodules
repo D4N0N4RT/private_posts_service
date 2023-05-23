@@ -1,6 +1,0 @@
-[submodule "MIREA_server_coursework"]
-	path = MIREA_server_coursework
-	url = https://github.com/D4N0N4RT/MIREA_server_coursework.git
-[submodule "post_service_frontend"]
-	path = post_service_frontend
-	url = https://github.com/D4N0N4RT/post_service_frontend.git
