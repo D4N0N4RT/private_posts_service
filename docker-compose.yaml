@@ -1,0 +1,51 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:14.1-alpine
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=db_user
+      - POSTGRES_PASSWORD=db_pass
+      - POSTGRES_DB=courseworkDB
+      - PGDATA=/var/lib/postgresql/data/courseworkDB
+    volumes:
+      - ./MIREA_server_coursework/sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  app:
+    container_name: coursework_spring
+    build:
+      context: ./MIREA_server_coursework
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://51.250.86.122:5432/courseworkDB
+      - SPRING_DATASOURCE_USERNAME=db_user
+      - SPRING_DATASOURCE_PASSWORD=db_pass
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - DB_HOST=51.250.86.122
+      - DB_PORT=5432
+      - DB_USERNAME=db_user
+      - DB_PASSWORD=db_pass
+      - DB_NAME=courseworkDB
+    ports:
+      - '8081:8081'
+    depends_on:
+      postgres:
+        condition: service_healthy
+  react:
+    container_name: coursework_react
+    build: ./post_service_frontend
+    environment:
+      REACT_APP_SPRING_URL: http://51.250.86.122:8081
+    ports:
+      - "3030:3000"
+    restart: always
+    volumes:
+      - ../post_service_frontend/src:/src/app/src
+    links:
+      - postgres
+      - app
